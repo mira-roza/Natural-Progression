@@ -22,7 +22,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import javax.annotation.ParametersAreNonnullByDefault;
 
 public class TwigFeature extends Feature<NoneFeatureConfiguration> {
-    public static final TagKey<Block> WONT_SUPPORT_TWIG = BlockTags.create(new ResourceLocation(Constants.MOD_ID, "wont_support_twig"));
+    public static final TagKey<Block> WONT_SUPPORT_TWIG = BlockTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "wont_support_twig"));
 
     public TwigFeature(Codec<NoneFeatureConfiguration> p_i231976_1_) {
         super(p_i231976_1_);
@@ -55,7 +55,7 @@ public class TwigFeature extends Feature<NoneFeatureConfiguration> {
                 }
             }
         } catch (Exception e) {
-            NatProg.getInstance().LOGGER.error(e.getMessage());
+            NatProg.getInstance().LOGGER.error("Erreur pendant le placement de la feature", e);
         }
         return true;
     }

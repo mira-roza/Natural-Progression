@@ -1,0 +1,22 @@
+{
+  "type": "natprog:damage_tools",
+  "ingredients": [
+    {
+      "item": "upgrade_aquatic:driftwood"
+    },
+    {
+      "tag": "natprog:saw"
+    }
+  ],
+  "result": {
+    "item": "upgrade_aquatic:driftwood_stripped",
+    "count": 1
+  },
+  "group": "planks",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "upgrade_aquatic"
+    }
+  ]
+}

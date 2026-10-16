@@ -1,0 +1,22 @@
+{
+  "type": "natprog:damage_tools",
+  "ingredients": [
+    {
+      "item": "swampexpansion:stripped_willow_log"
+    },
+    {
+      "tag": "natprog:saw"
+    }
+  ],
+  "result": {
+    "item": "swampexpansion:willow_planks",
+    "count": 4
+  },
+  "group": "planks",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "swampexpansion"
+    }
+  ]
+}

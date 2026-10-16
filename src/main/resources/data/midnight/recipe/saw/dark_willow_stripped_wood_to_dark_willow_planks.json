@@ -1,0 +1,22 @@
+{
+  "type": "natprog:damage_tools",
+  "ingredients": [
+    {
+      "item": "midnight:dark_willow_stripped_wood"
+    },
+    {
+      "tag": "natprog:saw"
+    }
+  ],
+  "result": {
+    "item": "midnight:dark_willow_planks",
+    "count": 4
+  },
+  "group": "planks",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "midnight"
+    }
+  ]
+}

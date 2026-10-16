@@ -1,0 +1,22 @@
+{
+  "type": "natprog:damage_tools",
+  "ingredients": [
+    {
+      "item": "byg:stripped_nightshade_wood"
+    },
+    {
+      "tag": "natprog:saw"
+    }
+  ],
+  "result": {
+    "item": "byg:nightshade_planks",
+    "count": 4
+  },
+  "group": "planks",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "byg"
+    }
+  ]
+}

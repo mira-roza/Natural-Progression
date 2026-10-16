@@ -1,82 +1,119 @@
 package com.oitsjustjose.natprog.common.data.damageitem;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Random;
 
-/**
- * @author Credit to Integral for the Enchantment Transpose Recipe as a guide
- * Special shapeless recipe that allows use of Tools, and damages the tool properly
- */
-
 public class DamageItemRecipe extends ShapelessRecipe {
+
+    private static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> SAWS =
+            net.minecraft.tags.TagKey.create(
+                    net.minecraft.core.registries.Registries.ITEM,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("natprog", "saw"));
+    private static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> AXES =
+            net.minecraft.tags.TagKey.create(
+                    net.minecraft.core.registries.Registries.ITEM,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("natprog", "axe"));
+
     private final NonNullList<Ingredient> inputs;
     private final ItemStack output;
 
-    public DamageItemRecipe(ResourceLocation id, String group, ItemStack output, NonNullList<Ingredient> inputs) {
-        super(id, group, output, inputs);
-        this.inputs = inputs;
-        this.output = output;
+    public DamageItemRecipe(
+            String group,
+            java.util.List<Ingredient> ingredients,
+            ItemStack output
+    ) {
+        super(
+                group,
+                CraftingBookCategory.MISC,
+                output,
+                toIngredientList(ingredients)
+        );
+    
+        this.inputs = super.getIngredients();
+        this.output = output.copy();
+    }
+    
+    private static NonNullList<Ingredient> toIngredientList(
+            java.util.List<Ingredient> ingredients
+    ) {
+        NonNullList<Ingredient> result = NonNullList.create();
+        result.addAll(ingredients);
+        return result;
     }
 
+    public ItemStack getOutput() {
+        return this.output;
+    }
+
+
     @Override
-    @Nonnull
-    public ItemStack assemble(@NotNull CraftingContainer p_44260_) {
+    public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer() {
+        return net.minecraft.core.registries.BuiltInRegistries.RECIPE_SERIALIZER.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                        "natprog", "damage_tools"));
+    }
+
+
+    @Override
+    public ItemStack assemble(
+            CraftingInput input,
+            net.minecraft.core.HolderLookup.Provider registries
+    ) {
         return this.output.copy();
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, @NotNull Level level) {
-        var stackedcontents = new StackedContents();
-        int i = 0;
+    public boolean matches(CraftingInput input, Level level) {
+        StackedContents contents = new StackedContents();
+        int occupiedSlots = 0;
 
-        for (int j = 0; j < inv.getContainerSize(); ++j) {
-            ItemStack itemstack = inv.getItem(j);
-            if (!itemstack.isEmpty()) {
-                ++i;
-                stackedcontents.accountStack(itemstack, 1);
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack stack = input.getItem(i);
+
+            if (!stack.isEmpty()) {
+                occupiedSlots++;
+                contents.accountStack(stack, 1);
             }
         }
 
-        return i == this.inputs.size() && stackedcontents.canCraft(this, null);
+        return occupiedSlots == this.inputs.size()
+                && contents.canCraft(this, null);
     }
 
     @Override
-    @Nonnull
-    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
-        var ret = NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
+    public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
+        NonNullList<ItemStack> remaining =
+                NonNullList.withSize(input.size(), ItemStack.EMPTY);
 
-        for (int i = 0; i < ret.size(); ++i) {
-            var stack = inv.getItem(i);
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack stack = input.getItem(i);
 
-            if (stack.isEmpty()) continue;
-            if (!stack.getItem().isDamageable(stack)) continue;
+            if (stack.isEmpty()
+                    || (!stack.is(SAWS) && !stack.is(AXES))
+                    || !stack.isDamageableItem()) {
+                continue;
+            }
 
-            var savedStack = stack.copy();
-            var random = new Random();
-            var unbreakingLvl = savedStack.getEnchantmentLevel(Enchantments.UNBREAKING);
-            var shouldAttemptDmg = unbreakingLvl <= 0 || ((1 + random.nextInt(5)) <= unbreakingLvl);
+            ItemStack damaged = stack.copy();
+            int damage = damaged.getDamageValue() + 1;
 
-            if (savedStack.getDamageValue() < savedStack.getMaxDamage()) {
-                if (shouldAttemptDmg) {
-                    savedStack.setDamageValue(savedStack.getDamageValue() + 1);
-                }
-                ret.set(i, savedStack);
-            } else {
-                ret.set(i, ItemStack.EMPTY);
+            if (damage < damaged.getMaxDamage()) {
+                damaged.setDamageValue(damage);
+                remaining.set(i, damaged);
             }
         }
 
-        return ret;
+        return remaining;
     }
 }

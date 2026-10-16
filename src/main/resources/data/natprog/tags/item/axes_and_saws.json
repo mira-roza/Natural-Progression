@@ -1,0 +1,21 @@
+{
+    "replace": false,
+    "values": [
+        "minecraft:wooden_axe",
+        "minecraft:stone_axe",
+        "minecraft:iron_axe",
+        "minecraft:golden_axe",
+        "minecraft:diamond_axe",
+        "minecraft:netherite_axe",
+        "natprog:flint_hatchet",
+        "natprog:copper_axe",
+        "natprog:bronze_axe",
+        "natprog:steel_axe",
+        "natprog:flint_saw",
+        "natprog:copper_saw",
+        "natprog:bronze_saw",
+        "natprog:steel_saw",
+        "natprog:diamond_saw",
+        "natprog:netherite_saw"
+    ]
+}

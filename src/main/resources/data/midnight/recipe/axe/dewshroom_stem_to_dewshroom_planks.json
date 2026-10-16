@@ -1,0 +1,22 @@
+{
+  "type": "natprog:damage_tools",
+  "ingredients": [
+    {
+      "item": "midnight:dewshroom_stem"
+    },
+    {
+      "tag": "natprog:axe"
+    }
+  ],
+  "result": {
+    "item": "midnight:dewshroom_planks",
+    "count": 1
+  },
+  "group": "planks",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "midnight"
+    }
+  ]
+}

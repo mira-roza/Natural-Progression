@@ -1,43 +1,32 @@
 package com.oitsjustjose.natprog.common.config;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.Builder;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.Builder;
 
-import java.nio.file.Path;
 
-@Mod.EventBusSubscriber
 public class CommonConfig {
-    public static final ForgeConfigSpec COMMON_CONFIG;
+    public static final ModConfigSpec COMMON_CONFIG;
     private static final Builder COMMON_BUILDER = new Builder();
 
-    public static ForgeConfigSpec.IntValue MAX_PEBBLES_PER_CHUNK;
-    public static ForgeConfigSpec.IntValue MAX_TWIGS_PER_CHUNK;
-    public static ForgeConfigSpec.BooleanValue TOOL_NEUTERING;
-    public static ForgeConfigSpec.BooleanValue REMOVE_WOODEN_TOOL_FUNC;
-    public static ForgeConfigSpec.BooleanValue REMOVE_STONE_TOOL_FUNC;
-    public static ForgeConfigSpec.BooleanValue MAKE_GROUND_BLOCKS_HARDER;
-    public static ForgeConfigSpec.BooleanValue ARE_PEBBLES_REPLACEABLE;
-    public static ForgeConfigSpec.BooleanValue ARE_TWIGS_PLACEABLE;
-    public static ForgeConfigSpec.IntValue FLINT_CHANCE;
-    public static ForgeConfigSpec.IntValue BONE_SHARD_CHANCE;
-    public static ForgeConfigSpec.IntValue BONE_DROP_CHANCE;
-    public static ForgeConfigSpec.BooleanValue ALL_ENTITIES_DROP_BONES;
-    public static ForgeConfigSpec.BooleanValue SHOW_BREAKING_HELP;
-    public static ForgeConfigSpec.BooleanValue INCORRECT_TOOL_DAMAGE;
-    public static ForgeConfigSpec.BooleanValue ENABLE_KNAPPING;
+    public static ModConfigSpec.IntValue MAX_PEBBLES_PER_CHUNK;
+    public static ModConfigSpec.IntValue MAX_TWIGS_PER_CHUNK;
+    public static ModConfigSpec.BooleanValue TOOL_NEUTERING;
+    public static ModConfigSpec.BooleanValue REMOVE_WOODEN_TOOL_FUNC;
+    public static ModConfigSpec.BooleanValue REMOVE_STONE_TOOL_FUNC;
+    public static ModConfigSpec.BooleanValue MAKE_GROUND_BLOCKS_HARDER;
+    public static ModConfigSpec.BooleanValue ARE_PEBBLES_REPLACEABLE;
+    public static ModConfigSpec.BooleanValue ARE_TWIGS_PLACEABLE;
+    public static ModConfigSpec.IntValue FLINT_CHANCE;
+    public static ModConfigSpec.IntValue BONE_SHARD_CHANCE;
+    public static ModConfigSpec.IntValue BONE_DROP_CHANCE;
+    public static ModConfigSpec.BooleanValue ALL_ENTITIES_DROP_BONES;
+    public static ModConfigSpec.BooleanValue SHOW_BREAKING_HELP;
+    public static ModConfigSpec.BooleanValue INCORRECT_TOOL_DAMAGE;
+    public static ModConfigSpec.BooleanValue ENABLE_KNAPPING;
 
     static {
         init();
         COMMON_CONFIG = COMMON_BUILDER.build();
-    }
-
-    public static void loadConfig(ForgeConfigSpec spec, Path path) {
-        final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
-        configData.load();
-        spec.setConfig(configData);
     }
 
     private static void init() {

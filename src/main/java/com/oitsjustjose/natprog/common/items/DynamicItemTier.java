@@ -1,16 +1,17 @@
+
 package com.oitsjustjose.natprog.common.items;
 
-import com.oitsjustjose.natprog.NatProg;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class DynamicItemTier implements Tier {
     private int uses;
@@ -34,34 +35,28 @@ public class DynamicItemTier implements Tier {
         return this;
     }
 
-    public DynamicItemTier setEfficiency(float eff) {
-        this.speed = eff;
+    public DynamicItemTier setEfficiency(float efficiency) {
+        this.speed = efficiency;
         return this;
     }
 
-    public DynamicItemTier setAttackDamage(float dmg) {
-        this.attackDamageBonus = dmg;
+    public DynamicItemTier setAttackDamage(float damage) {
+        this.attackDamageBonus = damage;
         return this;
     }
 
-    public DynamicItemTier setHarvestLvl(int lvl) {
-        this.harvestLvl = lvl;
+    public DynamicItemTier setHarvestLvl(int level) {
+        this.harvestLvl = level;
         return this;
     }
 
-    public DynamicItemTier setEnchantability(int ench) {
-        this.enchantability = ench;
+    public DynamicItemTier setEnchantability(int enchantability) {
+        this.enchantability = enchantability;
         return this;
     }
 
     public DynamicItemTier setRepairMat(@Nullable TagKey<Item> tag) {
-        if (tag == null) return this;
-
-        var tagItems = Objects.requireNonNull(ForgeRegistries.ITEMS.tags()).getTag(tag).stream().toList();
-        if (tagItems.size() == 0) {
-            this.repairIngredient = Ingredient.of(Items.BARRIER);
-            NatProg.getInstance().LOGGER.warn("Dynamic saw repair material {} could not be found. Defaulting to Bedrock", tag.toString());
-        } else {
+        if (tag != null) {
             this.repairIngredient = Ingredient.of(tag);
         }
         return this;
@@ -74,32 +69,35 @@ public class DynamicItemTier implements Tier {
 
     @Override
     public int getUses() {
-        return this.uses;
+        return uses;
     }
 
     @Override
     public float getSpeed() {
-        return this.speed;
+        return speed;
     }
 
     @Override
     public float getAttackDamageBonus() {
-        return this.attackDamageBonus;
+        return attackDamageBonus;
     }
 
-    @Override
     public int getLevel() {
-        return this.harvestLvl;
+        return harvestLvl;
     }
 
     @Override
     public int getEnchantmentValue() {
-        return this.enchantability;
+        return enchantability;
     }
 
     @Override
     @Nonnull
     public Ingredient getRepairIngredient() {
-        return this.repairIngredient;
+        return repairIngredient;
+    }
+    @Override
+    public TagKey<Block> getIncorrectBlocksForDrops() {
+        return BlockTags.INCORRECT_FOR_WOODEN_TOOL;
     }
 }

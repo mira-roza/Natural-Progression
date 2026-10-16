@@ -3,7 +3,7 @@ package com.oitsjustjose.natprog.common.event;
 import com.oitsjustjose.natprog.Constants;
 import com.oitsjustjose.natprog.NatProg;
 import com.oitsjustjose.natprog.common.config.CommonConfig;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
@@ -12,10 +12,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 public class BoneEvent {
 
-    public static final TagKey<EntityType<?>> ENTITY_THAT_DROPS_BONE = TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(Constants.MOD_ID, "drops_bone"));
+    public static final TagKey<EntityType<?>> ENTITY_THAT_DROPS_BONE = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "drops_bone"));
     private final HashMap<UUID, Long> playersLastRightClicked = new HashMap<>();
     private final Random rand = new Random();
 
@@ -61,7 +61,7 @@ public class BoneEvent {
         if (CommonConfig.BONE_DROP_CHANCE.get() == 0) return;
         if (evt.getEntity().getType().is(ENTITY_THAT_DROPS_BONE) || CommonConfig.ALL_ENTITIES_DROP_BONES.get()) {
             if (rand.nextInt(100) < CommonConfig.BONE_DROP_CHANCE.get()) {
-                var drop = new ItemEntity(evt.getEntity().getLevel(), evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ(), new ItemStack(Items.BONE));
+                var drop = new ItemEntity(evt.getEntity().level(), evt.getEntity().getX(), evt.getEntity().getY(), evt.getEntity().getZ(), new ItemStack(Items.BONE));
                 evt.getDrops().add(drop);
             }
         }

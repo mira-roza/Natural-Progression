@@ -1,6 +1,5 @@
 package com.oitsjustjose.natprog.common.event;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.oitsjustjose.natprog.common.config.CommonConfig;
 import com.oitsjustjose.natprog.Constants;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -10,19 +9,18 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraft.network.chat.Component;
 
 public class ToolNeutering {
-    public static final TagKey<Item> ALLOWED_WOOD_TOOLS = ItemTags.create(new ResourceLocation(Constants.MOD_ID, "allowed_wooden_tools"));
-    public static final TagKey<Item> ALLOWED_STONE_TOOLS = ItemTags.create(new ResourceLocation(Constants.MOD_ID, "allowed_stone_tools"));
+    public static final TagKey<Item> ALLOWED_WOOD_TOOLS = ItemTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "allowed_wooden_tools"));
+    public static final TagKey<Item> ALLOWED_STONE_TOOLS = ItemTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "allowed_stone_tools"));
 
+    
     @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
     public void onHover(ItemTooltipEvent evt) {
         var stack = evt.getItemStack();
         if (stack.isEmpty()) return;
@@ -30,19 +28,15 @@ public class ToolNeutering {
 
         if (!(stack.getItem() instanceof TieredItem tiered)) return;
 
-        if ((tiered.getTier() != Tiers.WOOD) || !CommonConfig.REMOVE_WOODEN_TOOL_FUNC.get()) return;
-        try {
-            var content = new TranslatableContents("natprog.too.brittle");
-            evt.getToolTip().add(content.resolve(null, null, 0));
-        } catch (CommandSyntaxException ex) { /*NOOP*/ }
+        if ((tiered.getTier() == Tiers.WOOD) && CommonConfig.REMOVE_WOODEN_TOOL_FUNC.get()) {
+            evt.getToolTip().add(Component.translatable("natprog.too.brittle"));
+        }
 
-
-        if ((tiered.getTier() != Tiers.STONE) || !CommonConfig.REMOVE_STONE_TOOL_FUNC.get()) return;
-        try {
-            var content = new TranslatableContents("natprog.too.blunt");
-            evt.getToolTip().add(content.resolve(null, null, 0));
-        } catch (CommandSyntaxException ex) { /*NOOP*/ }
+        if ((tiered.getTier() == Tiers.STONE) && CommonConfig.REMOVE_STONE_TOOL_FUNC.get()) {
+            evt.getToolTip().add(Component.translatable("natprog.too.blunt"));
+        }
     }
+
 
     @SubscribeEvent
     public void registerEvent(PlayerEvent.BreakSpeed evt) {

@@ -1,96 +1,60 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-    }
-    dependencies {
-        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.4.0"
-    }
-}
-
 plugins {
-    id "com.modrinth.minotaur" version "2.+"
-    id "com.matthewprenger.cursegradle" version "1.4.0+"
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
-repositories { maven { url = "https://maven.blamejared.com" } }
+version = mod_version
+group = mod_group_id
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
+base {
+    archivesName = "NaturalProgression-${game_version}-${mod_version}"
+}
 
-group = 'com.oitsjustjose.natprog'
-archivesBaseName = "NaturalProgression-${game_version}-${mod_version}"
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-minecraft {
-    mappings channel: 'official', version: "${game_version}"
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.blamejared.com'
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
     runs {
         client {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            mods { natprog { source sourceSets.main } }
+            client()
+            systemProperty 'forge.logging.console.level', 'debug'
         }
 
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            mods { natprog { source sourceSets.main } }
+            server()
+            programArgument '--nogui'
+            systemProperty 'forge.logging.console.level', 'debug'
+        }
+    }
+
+    mods {
+        natprog {
+            sourceSet sourceSets.main
         }
     }
 }
 
-
-dependencies {
-    minecraft "net.minecraftforge:forge:${game_version}-${forge_version}"
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
-jar {
+tasks.named('jar', Jar).configure {
     manifest {
         attributes([
-                "Specification-Title"     : "Natural-Progression",
-                "Specification-Vendor"    : "oitsjustjose.com",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${mod_version}",
-                "Implementation-Vendor"   : "oitsjustjose.com",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            'Specification-Title'   : 'Natural-Progression',
+            'Specification-Vendor'  : 'oitsjustjose.com',
+            'Specification-Version' : '1',
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'oitsjustjose.com'
         ])
     }
-}
-
-tasks.register('publish') {
-    dependsOn 'curseforge'
-    dependsOn 'modrinth'
-}
-
-curseforge {
-    apiKey = project.hasProperty("CURSEFORGE_API_KEY") ? project.CURSEFORGE_API_KEY : ""
-    project {
-        id = '349530'
-        changelogType = 'markdown'
-        changelog = file("./changelog.md")
-        releaseType = 'release'
-        addGameVersion "${game_version}"
-        mainArtifact(jar) {
-            displayName = "NatProg ${game_version} ${mod_version}"
-        }
-    }
-}
-
-modrinth {
-    token = project.hasProperty("MODRINTH_API_KEY") ? project.MODRINTH_API_KEY : ""
-    projectId = "VkVpYDxO"
-    versionName = "NatProg ${game_version} ${mod_version}"
-    versionNumber = "${game_version}-${mod_version}"
-    versionType = "release"
-    uploadFile = jar
-    gameVersions = ["${game_version}"]
-    loaders = ["forge"]
-    changelog = file("./changelog.md").text
 }

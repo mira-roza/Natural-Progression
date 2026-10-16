@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#natprog:can_have_twigs",
-  "features": "natprog:twigs_placed",
-  "step": "vegetal_decoration"
-}

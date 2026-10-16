@@ -1,22 +1,41 @@
+
 package com.oitsjustjose.natprog.common.event.block;
 
-import com.google.common.collect.Lists;
 import com.oitsjustjose.natprog.common.config.CommonConfig;
-import net.minecraft.world.level.material.Material;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
-import java.util.List;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public class EarthBreak {
-    public static final List<Material> EARTH_MATS = Lists.newArrayList(Material.TOP_SNOW, Material.SCULK, Material.CLAY, Material.DIRT, Material.GRASS, Material.SAND, Material.SNOW, Material.MOSS, Material.VEGETABLE, Material.POWDER_SNOW);
 
     @SubscribeEvent
     public void registerEvent(PlayerEvent.BreakSpeed evt) {
-        if (!CommonConfig.MAKE_GROUND_BLOCKS_HARDER.get()) return;
-        if (!EARTH_MATS.contains(evt.getState().getMaterial())) return;
-        if (!evt.getEntity().getMainHandItem().isCorrectToolForDrops(evt.getState())) {
-            evt.setNewSpeed(evt.getOriginalSpeed() / 4);
+        if (!CommonConfig.MAKE_GROUND_BLOCKS_HARDER.get()) {
+            return;
+        }
+
+        BlockState state = evt.getState();
+
+        boolean isEarthBlock =
+                state.is(BlockTags.DIRT)
+                || state.is(BlockTags.SAND)
+                || state.is(BlockTags.SNOW)
+                || state.is(Blocks.CLAY)
+                || state.is(Blocks.SCULK)
+                || state.is(Blocks.POWDER_SNOW)
+                || state.is(Blocks.MOSS_BLOCK)
+                || state.is(Blocks.MOSS_CARPET)
+                || state.is(Blocks.SHORT_GRASS)
+                || state.is(Blocks.TALL_GRASS);
+
+        if (!isEarthBlock) {
+            return;
+        }
+
+        if (!evt.getEntity().getMainHandItem().isCorrectToolForDrops(state)) {
+            evt.setNewSpeed(evt.getOriginalSpeed() / 4.0F);
         }
     }
 }

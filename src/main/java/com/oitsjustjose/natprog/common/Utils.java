@@ -2,133 +2,140 @@ package com.oitsjustjose.natprog.common;
 
 import com.oitsjustjose.natprog.Constants;
 import com.oitsjustjose.natprog.NatProg;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Material;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.FluidState;
 
 import javax.annotation.Nullable;
 
 public class Utils {
 
-    public static final TagKey<Block> GROUND = BlockTags.create(new ResourceLocation(Constants.MOD_ID, "ground"));
+    public static final TagKey<Block> GROUND =
+            BlockTags.create(
+                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "ground")
+            );
 
     public static Block getPebbleForPos(WorldGenLevel level, BlockPos pos) {
         var mapper = NatProg.getInstance().REGISTRY.Mapper;
         var search = new BlockPos(pos.getX(), level.getHeight(), pos.getZ());
+
         for (var y = level.getHeight() / 2; y < search.getY(); y++) {
             var at = level.getBlockState(search.below(y));
-            if (at.getBlock() == Blocks.STONE || at.getBlock() == Blocks.DEEPSLATE || at.getMaterial() == Material.AIR) {
+
+            if (at.is(Blocks.STONE) || at.is(Blocks.DEEPSLATE) || at.isAir()) {
                 continue;
             }
 
-            var resloc = ForgeRegistries.BLOCKS.getKey(at.getBlock());
-            if (mapper.containsKey(resloc)) return mapper.get(resloc).get();
+            var id = BuiltInRegistries.BLOCK.getKey(at.getBlock());
+            if (mapper.containsKey(id)) {
+                return mapper.get(id).get();
+            }
         }
 
-        // Fallback, a choice of Deepslate or Stone
-        var choice = level.getRandom().nextBoolean() ? Blocks.STONE : Blocks.DEEPSLATE;
-        var resloc = ForgeRegistries.BLOCKS.getKey(choice);
-        return mapper.get(resloc).get();
+        // Fallback : stone ou deepslate.
+        var choice = level.getRandom().nextBoolean()
+                ? Blocks.STONE
+                : Blocks.DEEPSLATE;
+
+        var id = BuiltInRegistries.BLOCK.getKey(choice);
+        return mapper.get(id).get();
     }
 
-    /**
-     * @param level an ISeedReader instance
-     * @param pos   A BlockPos to check in and around
-     * @return true if the block is water (since we can waterlog)
-     */
     public static boolean isInWater(WorldGenLevel level, BlockPos pos) {
-        return level.getBlockState(pos).getBlock() == Blocks.WATER;
+        return level.getBlockState(pos).getFluidState().isSourceOfType(
+                net.minecraft.world.level.material.Fluids.WATER
+        );
     }
 
-    /**
-     * @param level an ISeedReader instance
-     * @param pos   A BlockPos to check in and around
-     * @return true if the block is in a non-water fluid
-     */
     public static boolean inNonWaterFluid(WorldGenLevel level, BlockPos pos) {
-        return level.getBlockState(pos).getMaterial().isLiquid() && !isInWater(level, pos);
+        FluidState fluid = level.getBlockState(pos).getFluidState();
+
+        return !fluid.isEmpty() && !fluid.isSourceOfType(
+                net.minecraft.world.level.material.Fluids.WATER
+        );
     }
 
     @Nullable
-    public static BlockPos getTopLevelPlacePos(WorldGenLevel level, ChunkPos chunkPos) {
+    public static BlockPos getTopLevelPlacePos(
+            WorldGenLevel level,
+            ChunkPos chunkPos
+    ) {
         return getTopLevelPlacePos(level, chunkPos, -1);
     }
 
     @Nullable
-    public static BlockPos getTopLevelPlacePos(WorldGenLevel level, ChunkPos chunkPos, int spread) {
+    public static BlockPos getTopLevelPlacePos(
+            WorldGenLevel level,
+            ChunkPos chunkPos,
+            int spread
+    ) {
+        int usedSpread = Math.max(8, spread);
 
-        if (!(level instanceof WorldGenRegion region)) {
-            return null;
-        }
+        int xCenter = (chunkPos.getMinBlockX() + chunkPos.getMaxBlockX()) / 2;
+        int zCenter = (chunkPos.getMinBlockZ() + chunkPos.getMaxBlockZ()) / 2;
 
-        var usedSpread = Math.max(8, spread);
-        var xCenter = (chunkPos.getMinBlockX() + chunkPos.getMaxBlockX()) / 2;
-        var zCenter = (chunkPos.getMinBlockZ() + chunkPos.getMaxBlockZ()) / 2;
+        int x = xCenter + level.getRandom().nextInt(usedSpread)
+                * (level.getRandom().nextBoolean() ? 1 : -1);
+        int z = zCenter + level.getRandom().nextInt(usedSpread)
+                * (level.getRandom().nextBoolean() ? 1 : -1);
 
-        // Only put things in the negative X|Z if the spread is provided.
-        var blockPosX = xCenter + (level.getRandom().nextInt(usedSpread) * ((level.getRandom().nextBoolean()) ? 1 : -1));
-        var blockPosZ = zCenter + (level.getRandom().nextInt(usedSpread) * ((level.getRandom().nextBoolean()) ? 1 : -1));
+        int startY = level.getMaxBuildHeight() - 1;
 
-        if (!region.hasChunk(chunkPos.x, chunkPos.z)) {
-            return null;
-        }
+        for (int y = startY; y > level.getMinBuildHeight(); y--) {
+            BlockPos groundPos = new BlockPos(x, y, z);
 
-        var searchPos = new BlockPos(blockPosX, region.getHeight(), blockPosZ);
-
-        // With worlds being so much deeper,
-        // it makes most sense to take a top-down approach
-        while (searchPos.getY() > region.getMinBuildHeight()) {
-            // BlockState blockToPlaceOn = world.getBlockState(searchPos);
-            // Check if the location itself is solid
-            if (canPlaceOn(level, searchPos)) {
-                // Then check if the block above it is either air, or replacable
-                var actualPlacePos = searchPos.above();
-                if (canReplace(region, actualPlacePos)) {
-                    return actualPlacePos;
-                }
+            if (!canPlaceOn(level, groundPos)) {
+                continue;
             }
-            searchPos = searchPos.below();
+
+            BlockPos placePos = groundPos.above();
+
+            if (canReplace(level, placePos)) {
+                return placePos;
+            }
         }
 
         return null;
     }
 
-    /**
-     * Determines if the sample can be placed on this block
-     *
-     * @param level: A WorldGenLevel instance
-     * @param pos:   The current searching position that will be used to confirm
-     * @return true if the block below is solid on top AND isn't in the blacklist
-     */
     public static boolean canPlaceOn(WorldGenLevel level, BlockPos pos) {
-        var state = level.getBlockState(pos);
-        return Block.isShapeFullBlock(state.getShape(level, pos)) && state.is(GROUND);
+        BlockState state = level.getBlockState(pos);
+
+        return Block.isShapeFullBlock(state.getShape(level, pos))
+                && state.is(GROUND);
     }
 
-    /**
-     * @param level an ISeedReader instance
-     * @param pos   A BlockPos to check in and around
-     * @return true if the block at pos is replaceable
-     */
     public static boolean canReplace(WorldGenLevel level, BlockPos pos) {
-        var state = level.getBlockState(pos);
-        var mat = state.getMaterial();
-        return mat.isLiquid() || mat == Material.AIR || state.is(BlockTags.LEAVES) || mat.isReplaceable();
+        BlockState state = level.getBlockState(pos);
+
+        return state.isAir()
+                || state.is(BlockTags.LEAVES)
+                || state.canBeReplaced()
+                || !state.getFluidState().isEmpty();
     }
 
-    public static void fixSnowyBlock(WorldGenLevel level, BlockPos posPlaced) {
+    public static void fixSnowyBlock(
+            WorldGenLevel level,
+            BlockPos posPlaced
+    ) {
         var below = level.getBlockState(posPlaced.below());
+
         if (below.hasProperty(BlockStateProperties.SNOWY)) {
-            level.setBlock(posPlaced.below(), below.setValue(BlockStateProperties.SNOWY, Boolean.FALSE), 2 | 16);
+            level.setBlock(
+                    posPlaced.below(),
+                    below.setValue(BlockStateProperties.SNOWY, Boolean.FALSE),
+                    2 | 16
+            );
         }
     }
 }

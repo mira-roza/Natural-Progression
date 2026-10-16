@@ -1,0 +1,46 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="GNU GPLv3"
+issueTrackerURL="https://github.com/oitsjustjose/Natural-Progression/issues"
+
+[[mods]]
+modId="natprog"
+version="${file.jarVersion}"
+displayName="Natural Progression"
+displayURL=""
+credits="Contributors on GitHub"
+authors="oitsjustjose"
+description='''
+A configurable mod that adds difficulty to the early game by forcing pebble collection,
+knapping, and preventing wood breaking with a bare hand.
+
+Support me on Patreon at https://patreon.com/oitsjustjose
+'''
+
+[[dependencies.natprog]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.natprog]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.natprog]]
+modId="quark"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.natprog]]
+modId="create"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
